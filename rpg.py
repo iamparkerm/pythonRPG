@@ -1,6 +1,7 @@
 from random import randint
 import random
 
+# this version is python 2!
 class Character:
     def __init__(self):
         self.name = ""
@@ -180,7 +181,7 @@ class Player(Character):
             print "%s orates into the air at no one in particular. No one takes the bait." % self.name
         else:
             if self.do_damage(self.enemy):
-                print "%s vanquishes the %s! (?°?°)?? /(.O.\) " % (self.name, self.enemy.name)
+                print "%s vanquishes the %s! (?Â°?Â°)?? /(.O.\) " % (self.name, self.enemy.name)
                 self.enemy = None
                 self.state = 'normal'
                 self.knowledge += 1
@@ -194,7 +195,7 @@ class Player(Character):
             self.special -= 1
         else: 
             if self.special > 0:
-                print "%s uses %s \n(?°?°)?? /(.?.\) \n %s rekt the %s!" % (self.name, self.specialname, self.name, self.enemy.name)
+                print "%s uses %s \n(?Â°?Â°)?? /(.?.\) \n %s rekt the %s!" % (self.name, self.specialname, self.name, self.enemy.name)
                 self.do_maxdamage
                 self.enemy = None
                 self.state = 'normal' 
@@ -206,7 +207,7 @@ class Player(Character):
                 self.enemy_argue()
     def enemy_argue(self):
         if self.enemy.do_damage(self):
-            print "(?°?°)?? /(.?.\) %s was rekt by the %s!!!\n %s heads home to join a fantasy football league in shame.\nPlease try again." %(self.name, self.enemy.name, self.name)
+            print "(?Â°?Â°)?? /(.?.\) %s was rekt by the %s!!!\n %s heads home to join a fantasy football league in shame.\nPlease try again." %(self.name, self.enemy.name, self.name)
 
 def player_choice():
     choice=''
@@ -234,7 +235,7 @@ def player_choice():
     print "\nWelcome, %s." % p.name
 
 def kill_screen():
-    print "\n %s vanquished all the post-modernist illiberals! %s has returned freedom of speech to campus! \n  ????? ¯\(?)/¯ ?????" %(p.name, p.name)
+    print "\n %s vanquished all the post-modernist illiberals! %s has returned freedom of speech to campus! \n  ????? Â¯\(?)/Â¯ ?????" %(p.name, p.name)
     print "Hi, this is ReKrap, and thanks for playing today."
     print "developer - ReKrap"
     print "writer - ReKrap"
