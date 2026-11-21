@@ -1,6 +1,6 @@
 # Owl Town RPG
 
-A Python text RPG written by Parker to learn python. Updated by Codex to fix a few bugs.
+A Python text RPG created by Parker in 2018 to learn python. Updated by Codex in 2026 to fix a few bugs and to port to web.
 
 ## Play
 
