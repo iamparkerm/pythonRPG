@@ -1,7 +1,6 @@
 # Owl Town RPG
 
-A Python text RPG for learning and playing with friends. The original story and
-terminal game are preserved. Use Python 3.12 on Windows; no extra packages needed.
+A Python text RPG written by Parker to learn python. Updated by Codex to fix a few bugs.
 
 ## Play
 
