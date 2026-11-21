@@ -73,9 +73,7 @@ class Player(Character):
         )
 
     def dumber(self):
-        if self.knowledge <= 1:
-            pass
-        else:
+        if self.knowledge > 1:
             self.emit("{} feels a little dumber now.".format(self.name))
             self.knowledge -= 1
 
@@ -130,30 +128,25 @@ class Player(Character):
         if self.state != 'normal':
             self.emit("{} is too busy right now!".format(self.name))
             self.enemy_argue()
+            return
+
+        self.emit("{} explores campus.\n".format(self.name))
+        if self.rng.randint(0, 1):
+            self.enemy = Enemy(self)
+            self.emit("{} encounters a {}! The {} shrieks:".format(self.name, self.enemy.name, self.enemy.name))
+            self.enemy.quote()
+            self.state = 'argue'
+        elif self.rng.randint(0, 1):
+            self.emit("{} finds a flyer pointing him towards today's big free speach rally and corrects his course.".format(self.name))
+        elif self.rng.randint(0, 1):
+            self.emit("{} stumbles upon a library! Choose a book from the below shelf to take with you:".format(self.name))
+            self.emit("\nCarl Sagan? type 1 \nKurt Vonnegut? press 2 \nDavid Deutsch? press 3 \nSam Harris? press 4 \nRichard Feynman? press 5\nLeave without a book? press 0")
+            self.state = 'book_choice'
+        elif self.rng.randint(0, 1):
+            self.emit("Oops, {} realized he just walked in a circle...".format(self.name))
+            self.dumber()
         else:
-            self.emit("{} explores campus.\n".format(self.name))
-            if self.rng.randint(0, 1):
-                self.enemy = Enemy(self)
-                self.emit("{} encounters a {}! The {} shrieks:".format(self.name, self.enemy.name, self.enemy.name))
-                self.enemy.quote()
-                self.state = 'argue'
-            else:
-                if self.rng.randint(0, 1):
-                    self.emit(
-                        "{} finds a flyer pointing him towards today's big free speach rally and corrects his course.".format(
-                            self.name))
-                else:
-                    if self.rng.randint(0, 1):
-                        self.emit("{} stumbles upon a library! Choose a book from the below shelf to take with you:".format(
-                            self.name))
-                        self.emit("\nCarl Sagan? type 1 \nKurt Vonnegut? press 2 \nDavid Deutsch? press 3 \nSam Harris? press 4 \nRichard Feynman? press 5\nLeave without a book? press 0")
-                        self.state = 'book_choice'
-                    else:
-                        if self.rng.randint(0, 1):
-                            self.emit("Oops, {} realized he just walked in a circle...".format(self.name))
-                            self.dumber()
-                        else:
-                            self.emit("{} ventures further toward the liberal arts halls.".format(self.name))
+            self.emit("{} ventures further toward the liberal arts halls.".format(self.name))
 
     def flee(self):
         if self.state != 'argue':

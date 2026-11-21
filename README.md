@@ -1,110 +1,68 @@
 # Owl Town RPG
 
-The original Python text RPG, with a shared game engine that can later power a
-browser interface. The terminal game remains playable. No third-party Python
-packages are required. Python 3.10 or newer is supported.
+A Python text RPG for learning and playing with friends. The original story and
+terminal game are preserved. Use Python 3.12 on Windows; no extra packages needed.
 
-## Play in the terminal
+## Play
 
-From the repository directory:
+Open PowerShell in the repository folder:
 
-```sh
+```powershell
 python main.py
 ```
 
-Choose a character with `1` through `5`. Type `help` for commands. The original
-first-letter shortcuts work: `h`, `s`, `b`, `e`, `a`, `r`, `u`, `f`, and `q`.
-`use special` is the full special-attack command. Commands ignore case and extra
-whitespace. Additional unrelated words are rejected rather than ignored.
+Choose a character with 1–5. Type `help` for commands. First-letter shortcuts
+work: h, s, b, e, a, r, u, f, q. The full special command is `use special`.
+In the library, pick a book with 1–5 or leave with 0. Type q to quit.
 
-Library visits ask for a book on the next turn. Choose `1` through `5`, or `0` to
-leave without a book. Invalid choices repeat the prompt. `quit` or `q` works at
-any prompt. End-of-input and Ctrl+C also end the terminal session.
+## Read the code
 
-## Architecture
+- `scripts/classes.py`: characters, combat, exploration, books, and story data.
+  Rules collect messages instead of printing them.
+- `scripts/engine.py`: one game session. Tracks which part of the game you're
+  in and handles one command or menu choice at a time.
+- `main.py`: the terminal loop. It asks for input and prints the messages.
+- `tests/`: original working rules, the known bugs, and a complete playthrough.
 
-- `scripts/classes.py` retains the original character hierarchy, combat,
-  exploration, books, and story data. Rules emit messages to a collector and use
-  an injected random-number generator.
-- `scripts/engine.py` owns one session, routes commands and pending choices, and
-  resolves boss progression, victory, defeat, and quitting.
-- `main.py` renders messages and handles terminal input and the introduction's
-  delay. The rules do not read input, print, sleep, or exit the process.
-- `tests/` protects original working rules, the bug fixes, and terminal sessions.
-
-To drive the same Python game from another interface:
+The main change is separating *what happens* from *how it is displayed*. The
+terminal uses the engine now; a browser can use the same Python rules later.
 
 ```python
-import random
 from scripts.engine import Game
 
-game = Game(rng=random.Random(42))  # Omit rng for a normal random game.
-intro = game.start()
-selection = game.submit("5")
-turn = game.submit("explore")
+game = Game()
+intro = game.start()          # List of introduction messages
+messages = game.submit("5")  # Select Parker
+messages = game.submit("e")  # Explore
 ```
 
-Each result is a fresh, JSON-compatible dictionary:
+`start()` returns the introduction. `submit(text)` returns that turn's messages.
+`game.phase` tells you whether you're choosing, exploring, fighting, or finished.
+`game.prompt` is the next input prompt; `game.finished` ends the loop.
+Create another `Game()` to start over.
 
-- `messages`: the messages produced by this turn, in display order.
-- `phase`: `character_selection`, `exploration`, `book_selection`, `combat`,
-  `boss_combat`, `won`, `lost`, or `quit`.
-- `prompt`: the next input prompt, or `None` when finished.
-- `choices`: command or menu values and display labels. Commands may have
-  different consequences depending on the phase; the engine validates them.
-- `state`: a snapshot containing player statistics, books, and the active enemy.
-- `finished`: whether the session has ended.
+## What was fixed
 
-Call `start()` before `submit()`. Calling `start()` again does not reset the
-session or repeat the introduction. Submissions after an ending do not change
-the game. To restart, construct a new `Game`. A state snapshot is for display;
-it is not yet a save-game format. Adapters should call the engine sequentially.
+- Menu choices no longer execute Python expressions.
+- Empty backpacks display correctly, and reading without books is safe.
+- All collected books are shown; the book count comes from the inventory.
+- Specials actually defeat the enemy, and charges stop at zero.
+- Dying during the boss fight ends the game.
+- Escaping the boss no longer wins. The next exploration resumes the same boss.
 
-## Preservation and corrections
+Knowledge still serves as both health and progression. Ordinary wins increase
+current and maximum knowledge; special wins increase only current knowledge.
+These original balance rules are unchanged. Parker keeps the special name from
+the original introduction. Book reading keeps its original author priority.
 
-The story text, characters, starting statistics, exploration probabilities,
-damage formula, author-reading priority, and first-letter commands are retained.
-Parker uses the special name from the original playable introduction:
-`REKRAP ASTRAL PLANE!`.
+## Run the tests
 
-Knowledge still acts as both health and progression. Reaching 16 current
-knowledge starts the boss encounter once the player is out of ordinary combat.
-Ordinary victories increase current and maximum knowledge; special victories
-still increase only current knowledge. This can exceed the maximum, as in the
-original game. Balancing these rules is separate from extracting the engine.
-
-The cleanup corrects these defects:
-
-- Character and book choices are validated strings; input is never evaluated as
-  Python code.
-- Zero knowledge ends the session immediately, including during the boss fight.
-- Boss victory requires defeating the boss. Successful escape returns to
-  exploration, and the next `explore` resumes that same boss with its remaining
-  knowledge. Escape no longer triggers the win screen.
-- Special attacks actually reduce the enemy to zero and charges cannot become
-  negative. Both attack types share encounter cleanup while retaining their
-  original different rewards.
-- Reading an empty backpack is safe and awards no knowledge.
-- Inventory contains actual books, without placeholder slots. All books are
-  displayed, duplicate copies remain usable, and the count is derived from the
-  inventory. No six-book capacity rule is introduced; the old pickup code did
-  not enforce one.
-- Book data is immutable, so sessions can safely share the story constants.
-
-## Tests
-
-```sh
+```powershell
 python -B -m unittest discover -s tests -v
 ```
 
-The initial seven characterization tests were first run against the unmodified
-game. After extraction, those assertions use collected messages instead of
-capturing standard output. Scripted random rolls test individual branches and
-complete playthroughs. Seeded replay checks all random choices use the same
-session generator. Terminal tests exercise selection, library input, victory,
-defeat, restart, and interrupted input through the real engine.
+The first seven tests were checked against the original game before extraction.
+The remaining tests cover the listed fixes and normal play. One Windows check
+runs the same command on GitHub when code changes.
 
-GitHub Actions runs the suite on Linux and Windows with Python 3.10 and 3.14.
-This stage adds no browser interface, hosting, DNS changes, or LLM dependency.
-The engine interface is the foundation for a later Pyodide browser adapter and
-GitHub Pages deployment.
+Browser hosting and LLM agents come later.

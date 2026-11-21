@@ -7,12 +7,6 @@ from scripts import classes
 
 
 class OriginalRulesTests(unittest.TestCase):
-    def capture(self, action):
-        player = action.__self__
-        player.messages.clear()
-        action()
-        return '\n'.join(player.messages)
-
     def test_starting_player(self):
         player = classes.Player()
         self.assertEqual((player.knowledge, player.knowledge_max), (7, 8))
@@ -22,7 +16,8 @@ class OriginalRulesTests(unittest.TestCase):
     def test_read_journal_consumes_it_and_restores_one_knowledge(self):
         player = classes.Player()
         player.name = "Parker"
-        output = self.capture(player.read)
+        player.read()
+        output = '\n'.join(player.messages)
         self.assertEqual((player.knowledge, player.books), (8, 0))
         self.assertIn("Remember to check off your habitica dailies.", output)
         self.assertIn("Parker feels smarter!", output)
@@ -30,7 +25,7 @@ class OriginalRulesTests(unittest.TestCase):
     def test_read_at_maximum_preserves_books(self):
         player = classes.Player()
         player.knowledge = player.knowledge_max
-        self.capture(player.read)
+        player.read()
         self.assertEqual(player.books, 1)
 
     def test_ordinary_victory_rewards_current_and_maximum_knowledge(self):
@@ -40,12 +35,12 @@ class OriginalRulesTests(unittest.TestCase):
         player.enemy = enemy
         player.state = "argue"
         with patch.object(player.rng, "randint", side_effect=[7, 0]):
-            output = self.capture(player.argue)
+            player.argue()
         self.assertEqual(enemy.knowledge, 0)
         self.assertEqual((player.knowledge, player.knowledge_max), (8, 9))
         self.assertEqual(player.state, "normal")
         self.assertIsNone(player.enemy)
-        self.assertIn("vanquishes the Opponent!", output)
+        self.assertIn("vanquishes the Opponent!", '\n'.join(player.messages))
 
     def test_zero_damage_counters_without_healing(self):
         player = classes.Player()
@@ -57,7 +52,7 @@ class OriginalRulesTests(unittest.TestCase):
     def test_wandering_penalty_stops_at_one(self):
         player = classes.Player()
         player.knowledge = 1
-        self.capture(player.dumber)
+        player.dumber()
         self.assertEqual(player.knowledge, 1)
 
     def test_boss_starts_at_twenty(self):

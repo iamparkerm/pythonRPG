@@ -1,27 +1,24 @@
-"""Terminal adapter for Owl Town RPG. Run with: python main.py"""
+"""Terminal interface for Owl Town RPG. Run with: python main.py"""
 
 import time
 
 from scripts.engine import Game
 
 
-def main(read=input, write=print, pause=time.sleep):
+def main():
     game = Game()
-    result = game.start()
-    for index, message in enumerate(result['messages']):
-        write(message)
-        if index == 0:
-            pause(2)
+    intro = game.start()
+    print(intro[0])
+    time.sleep(2)
+    print(intro[1])
 
-    while not result['finished']:
+    while not game.finished:
         try:
-            text = read(result['prompt'])
+            text = input(game.prompt)
         except (EOFError, KeyboardInterrupt):
             text = 'quit'
-        result = game.submit(text)
-        for message in result['messages']:
-            write(message)
-    return game
+        for message in game.submit(text):
+            print(message)
 
 
 if __name__ == '__main__':
