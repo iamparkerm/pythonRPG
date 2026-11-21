@@ -1,7 +1,5 @@
 """Protect working rules from the original terminal game before extraction."""
 
-import contextlib
-import io
 import unittest
 from unittest.mock import patch
 
@@ -10,10 +8,10 @@ from scripts import classes
 
 class OriginalRulesTests(unittest.TestCase):
     def capture(self, action):
-        output = io.StringIO()
-        with contextlib.redirect_stdout(output):
-            action()
-        return output.getvalue()
+        player = action.__self__
+        player.messages.clear()
+        action()
+        return '\n'.join(player.messages)
 
     def test_starting_player(self):
         player = classes.Player()
@@ -41,7 +39,7 @@ class OriginalRulesTests(unittest.TestCase):
         enemy.name = "Opponent"
         player.enemy = enemy
         player.state = "argue"
-        with patch.object(classes, "randint", side_effect=[7, 0]):
+        with patch.object(player.rng, "randint", side_effect=[7, 0]):
             output = self.capture(player.argue)
         self.assertEqual(enemy.knowledge, 0)
         self.assertEqual((player.knowledge, player.knowledge_max), (8, 9))
@@ -52,8 +50,8 @@ class OriginalRulesTests(unittest.TestCase):
     def test_zero_damage_counters_without_healing(self):
         player = classes.Player()
         enemy = classes.Character()
-        with patch.object(classes, "randint", side_effect=[0, 1]):
-            self.capture(lambda: player.do_damage(enemy))
+        with patch.object(player.rng, "randint", side_effect=[0, 1]):
+            player.do_damage(enemy)
         self.assertEqual(enemy.knowledge, 1)
 
     def test_wandering_penalty_stops_at_one(self):
